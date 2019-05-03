@@ -43,9 +43,10 @@ class args(object):
     dataset = "HSpam14"
     full_data = True
     usingWeightRandomSampling = True
-    vocab_size = 8000  # if we create the new vocab size, we have to do the new preprocess again
+    # if we create the new vocab size, we have to do the new preprocess again
+    vocab_size = 30000
     validation_portion = 0.05
-    test_portion = 0.04
+    test_portion = 0.5
     random_seed = 64
 
     scheduler_step = 2000
@@ -54,16 +55,32 @@ class args(object):
 
     num_features = 16
 
-    pickle_name = "UserAndTweetsFullPickleData" + str(vocab_size) + "Vocab.txt"
-    pickle_name_beforeMapToIdx = "UserAndTweetsFullPickleDatabeforeMapToIdx.txt"
+    pickle_name = "TweetsAndExtraInfoFullPickleData" + \
+        str(vocab_size) + "Vocab_Test" + str(test_portion) + ".txt"
+    pickle_name_beforeMapToIdx = "TweetsAndExtraInfoFullPickleData_df.txt"
 
     # Arch
-
     # 3 more columns to implement
     MultiTask_FCHidden = 16
     textModel_outDim = 16
     infoModel_outDim = 16
     combine_dim = 32
+
+    using_infoModel = True
+    using_textModel = True
+
+    assert (using_infoModel or using_textModel)
+
+    # One of them is false or both of them are false
+    if not (using_infoModel and using_textModel):
+        if (not using_infoModel) and (not using_textModel):
+            raise ValueError('You must have to select infoModel or textModel')
+        elif using_infoModel:
+            infoModel_outDim = 1  # can't be changed latter
+        elif using_textModel:
+            textModel_outDim = 1  # can't be changed latter
+    else:
+        print('Using Both Model')
 
     # GatedCNN arch
 
@@ -112,7 +129,7 @@ class args(object):
     adam_beta1 = 0.9
     adam_beta2 = 0.999
 
-    earlyStopStep = 1500  # Set None if we don't want it
+    earlyStopStep = 99999999  # Set None if we don't want it
     earlyStopEpoch = 1
 
     # Logging the Training
@@ -203,8 +220,66 @@ models_list = ['SSCL', 'GatedCNN', 'SelfAttn']
 setRadioButtons(modelSelected, "Model", models_list,
                 models_list, Take_ModelSelection, 0, 2)
 
+
+def setModelHyperPrams(window, text, x, y):
+
+    l = tk.Label(window,
+                 text=text,
+                 font=('Arial', 12),
+                 )
+    l.grid(column=x, row=y, padx=10)
+    e = tk.Entry(window)
+    e.grid(column=x, row=y+1, padx=10)
+    return l, e
+
+
+def toggleCheckingCommand():
+
+    args.using_infoModel = using_infoModel.var.get()
+    args.using_textModel = using_textModel.var.get()
+    print("State1: ", using_textModel.var.get())
+    print("State2: ", using_infoModel.var.get())
+
+    # One of them is false or both of them are false
+    if not (args.using_infoModel and args.using_textModel):
+        if (not args.using_infoModel) and (not args.using_textModel):
+            resultTextbox.insert("end", ('Must Select at least one model\n'))
+            window.update_idletasks()
+        elif args.using_infoModel:
+            args.infoModel_outDim = 1  # can't be changed latter
+            infoModel_outDim.delete(0, tk.END)
+            infoModel_outDim.insert("end", args.infoModel_outDim)
+        elif using_textModel:
+            args.textModel_outDim = 1  # can't be changed latter
+            textModel_outDim.delete(0, tk.END)
+            textModel_outDim.insert("end", args.textModel_outDim)
+    else:
+        print('Using Both Model')
+
+    if not(args.using_infoModel and args.using_textModel):
+        infoModel_outDim.config(state='disabled')
+        textModel_outDim.config(state='disabled')
+        MultiTask_FCHidden.config(state='disabled')
+        combine_dim.config(state='disabled')
+    else:
+        infoModel_outDim.config(state='normal')
+        textModel_outDim.config(state='normal')
+        MultiTask_FCHidden.config(state='normal')
+        combine_dim.config(state='normal')
+
+
+def setCheckbox(window, text, x, y, command):
+    var = tk.IntVar()
+    c = tk.Checkbutton(window, text=text, onvalue=1,
+                       offvalue=0, command=command, variable=var)
+    c.grid(column=x, row=y)
+    c.var = var
+    return c
+
+
 x = 0
-y = 4
+y = 6
+
 MultiTask_FCHidden_label, MultiTask_FCHidden = setModelHyperPrams(
     window, 'MultiTask_FCHidden', x, (y+1*2))
 textModel_outDim_label, textModel_outDim = setModelHyperPrams(
@@ -214,6 +289,17 @@ infoModel_outDim_label, infoModel_outDim = setModelHyperPrams(
 combine_dim_label, combine_dim = setModelHyperPrams(
     window, 'combine_dim', x, (y+4*2))
 
+
+using_textModel = setCheckbox(
+    window, 'using_textModel', x, 6, toggleCheckingCommand)
+using_infoModel = setCheckbox(
+    window, 'using_infoModel', x, 7, toggleCheckingCommand)
+
+if args.using_textModel:
+    using_textModel.select()
+
+if args.using_infoModel:
+    using_infoModel.select()
 
 x = 1
 y = 0
@@ -414,7 +500,7 @@ scheduler_minLr_label, scheduler_minLr = setHyperPrams(
 
 usingWeightRandomSampling = tk.IntVar(value=args.usingWeightRandomSampling)
 setBoolHyerParams(window, usingWeightRandomSampling,
-                  "usingWeightRandomSampling", 0, (y+(16)))
+                  "usingWeightRandomSampling", 0, (y+(18)))
 
 
 resultTextbox = tk.Text(window, width=90)
@@ -425,9 +511,9 @@ resultTextbox_scrollbar = tk.Scrollbar(
 
 resultTextbox.configure(yscrollcommand=resultTextbox_scrollbar.set)
 
-resultTextbox_scrollbar.grid(column=4, row=17, sticky=tk.W+tk.S+tk.N)
+resultTextbox_scrollbar.grid(column=4, row=19, sticky=tk.W+tk.S+tk.N)
 # resultTextbox.pack(side="right", fill="y")
-resultTextbox.grid(column=0, row=17, columnspan=4)
+resultTextbox.grid(column=0, row=19, columnspan=4)
 
 vocab_size.insert("end", args.vocab_size)
 validation_portion.insert("end", args.validation_portion)
@@ -713,13 +799,13 @@ def StartTraining():
                 trainer.plot_train_hist(args.model_name)
 
                 TrainImg = ImageTk.PhotoImage(Image.open(args.log_path+"Train_Loss&Acc_Hist_" + str(
-                    args.model_name) + ".png").resize((1000, 470), Image.ANTIALIAS))
+                    args.model_name) + ".png").resize((960, 470), Image.ANTIALIAS))
 
                 training_Canvas.config(image=TrainImg)
 
                 training_Canvas.image = TrainImg
 
-                training_Canvas.grid(column=5, row=0, rowspan=16)
+                training_Canvas.grid(column=5, row=0, rowspan=18)
 
                 window.update_idletasks()
 
@@ -764,13 +850,13 @@ def StartTraining():
                 trainer.plot_all(args.model_name)
 
                 TrainAndValImg = ImageTk.PhotoImage(Image.open(
-                    args.log_path + "All_Hist_" + str(args.model_name) + ".png").resize((1000, 470), Image.ANTIALIAS))
+                    args.log_path + "All_Hist_" + str(args.model_name) + ".png").resize((960, 470), Image.ANTIALIAS))
 
                 trainingAndVal_Canvas.config(image=TrainAndValImg)
 
                 trainingAndVal_Canvas.image = TrainAndValImg
 
-                trainingAndVal_Canvas.grid(column=5, row=17)
+                trainingAndVal_Canvas.grid(column=5, row=19)
 
                 window.update_idletasks()
 
@@ -783,10 +869,11 @@ def StartTraining():
                 break
 
     # Doing test here
-    trainer.eval()
 
     test_loader = DataLoader(
         test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False)
+
+    print('Test_dataset size:', len(test_dataset))
     test_accs = []
     test_cms = []
     trainer.eval()
@@ -794,12 +881,13 @@ def StartTraining():
         test_text, test_extra_info, test_length, test_label = test_text.to(
             device), test_extra_info.to(device), test_length.to(device), test_label.to(device)
         test_loss, test_accuracy, test_cm = trainer.test_step(
-            ((test_text, test_extra_info), test_length), test_label)
+            ((test_text, test_extra_info), None), test_label)
+#         trainer.test_step(((test_text, test_extra_info), test_length), test_label)
         test_accs.append(test_accuracy)
         test_cms.append(test_cm)
 
     resultTextbox.insert(
-        "end", ("\n\n========================================================================================="))
+        "end", ("\n\n=========================================================================================\n"))
     resultTextbox.insert("end", ("The Test Accuracy: " +
                                  str(torch.mean(torch.tensor(test_accs))) + "\n"))
     resultTextbox.insert("end", ("Test Confusion Matrix: \n"))
@@ -814,12 +902,12 @@ ShowModel = tk.Button(window,
                       command=TakeNumOfParams)
 # ShowModel.place(x=10, y=330, anchor="nw")
 
-ShowModel.grid(column=0, row=14, rowspan=1)
+ShowModel.grid(column=0, row=16, rowspan=1)
 
 StartButton = tk.Button(window,
                         text='Strat Training',
                         width=15, height=1,
                         command=StartTraining)
-StartButton.grid(column=0, row=15, rowspan=1)
+StartButton.grid(column=0, row=17, rowspan=1)
 
 window.mainloop()

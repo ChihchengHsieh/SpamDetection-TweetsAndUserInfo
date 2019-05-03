@@ -487,7 +487,7 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
             def TweetsWithUserInfoPreprocessing():
                 for colName in args.preprocessingStra.keys():
                     resultTextbox.insert(
-                        "end", ("Dataset size: " + str(len(df)) + "\n"))
+                        "end", ("Preprocessing feature: " + str(colName) + "\n"))
                     window.update_idletasks()
                     for step in args.preprocessingStra[colName]['steps']:
                         if not step is None:
@@ -530,21 +530,21 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
             df = pd.get_dummies(df, drop_first=True, columns=[
                                 'possibly_sensitive', 'default_profile', 'default_profile_image', 'verified'])
 
-            resultTextbox.insert("end", ('Spliting Datasets...\n'))
-            window.update_idletasks()
-            X_train, X_test, Y_train, Y_test = train_test_split(df.drop(
-                'maliciousMark', axis=1), df['maliciousMark'], test_size=args.validation_portion, stratify=df['maliciousMark'],  random_state=args.random_seed)
-            X_validation, X_test, Y_validation, Y_test = train_test_split(
-                X_test, Y_test, test_size=args.test_portion, stratify=Y_test, random_state=args.random_seed)
+            # resultTextbox.insert("end", ('Spliting Datasets...\n'))
+            # window.update_idletasks()
+            # X_train, X_test, Y_train, Y_test = train_test_split(df.drop(
+            #     'maliciousMark', axis=1), df['maliciousMark'], test_size=args.validation_portion, stratify=df['maliciousMark'],  random_state=args.random_seed)
+            # X_validation, X_test, Y_validation, Y_test = train_test_split(
+            #     X_test, Y_test, test_size=args.test_portion, stratify=Y_test, random_state=args.random_seed)
 
-            resultTextbox.insert("end", ('Creating Tweets_text...\n'))
-            window.update_idletasks()
-            tweets_text = nltk.Text(list(itertools.chain(*X_train['text'])))
+            # resultTextbox.insert("end", ('Creating Tweets_text...\n'))
+            # window.update_idletasks()
+            # tweets_text = nltk.Text(list(itertools.chain(*X_train['text'])))
 
             with open(os.path.join(args.dataset, args.pickle_name_beforeMapToIdx), "wb") as fp:  # Pickling
-                pickle.dump([X_train, X_validation, X_test,
-                             Y_train, Y_validation, Y_test,  tweets_text], fp)
-
+                # pickle.dump([X_train, X_validation, X_test,
+                #              Y_train, Y_validation, Y_test,  tweets_text], fp)
+                pickle.dump(df,fp)
                 resultTextbox.insert("end", ("The Pickle Data beforeMapToIdx Dumped to: " + str(os.path.join(
                     args.dataset, args.pickle_name_beforeMapToIdx)) + "\n"))
                 window.update_idletasks()
@@ -557,8 +557,25 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
                                          str(os.path.join(args.dataset, args.pickle_name_beforeMapToIdx)) + "\n"))
             window.update_idletasks()
             with open(os.path.join(args.dataset, args.pickle_name_beforeMapToIdx), "rb") as fp:   # Unpickling
-                [X_train, X_validation, X_test,
-                 Y_train, Y_validation, Y_test,  tweets_text] = pickle.load(fp)
+                # [X_train, X_validation, X_test,
+                #  Y_train, Y_validation, Y_test,  tweets_text] = pickle.load(fp)
+                df = pickle.load(fp)
+
+        #################
+
+        resultTextbox.insert("end", ('Spliting Datasets...\n'))
+        window.update_idletasks()
+        X_train, X_test, Y_train, Y_test = train_test_split(df.drop(
+            'maliciousMark', axis=1), df['maliciousMark'], test_size=args.validation_portion, stratify=df['maliciousMark'],  random_state=args.random_seed)
+        X_validation, X_test, Y_validation, Y_test = train_test_split(
+            X_test, Y_test, test_size=args.test_portion, stratify=Y_test, random_state=args.random_seed)
+
+        resultTextbox.insert("end", ('Creating Tweets_text...\n'))
+        window.update_idletasks()
+        tweets_text = nltk.Text(list(itertools.chain(*X_train['text'])))
+
+        ####################
+    
 
         args.vocab_size = args.vocab_size or len(tweets_text.tokens)
         if args.vocab_size:  # and this if expression

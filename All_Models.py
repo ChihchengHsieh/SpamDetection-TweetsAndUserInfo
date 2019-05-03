@@ -19,38 +19,63 @@ class MultiTaskModel(nn.Module):
     def __init__(self, textModel, args):
         super(MultiTaskModel, self).__init__()
 
-        self.textModel = textModel(args)
+        if args.using_textModel:
+            self.textModel = textModel(args)
+            self.customForward = self.usingTextForward
 
-        self.infoModel = nn.Sequential(
-            nn.Linear(args.num_features-1, args.MultiTask_FCHidden*2),
-            nn.BatchNorm1d(args.MultiTask_FCHidden*2),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(args.MultiTask_FCHidden*2, args.MultiTask_FCHidden*2),
-            nn.BatchNorm1d(args.MultiTask_FCHidden*2),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(args.MultiTask_FCHidden*2, args.MultiTask_FCHidden),
-            nn.BatchNorm1d(args.MultiTask_FCHidden),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(args.MultiTask_FCHidden, args.infoModel_outDim),
-        )
+        if args.using_infoModel:
+            self.infoModel = nn.Sequential(
+                nn.Linear(args.num_features-1, args.MultiTask_FCHidden*2),
+                nn.BatchNorm1d(args.MultiTask_FCHidden*2),
+                nn.LeakyReLU(0.2, inplace=True),
+                nn.Linear(args.MultiTask_FCHidden*2,
+                          args.MultiTask_FCHidden*2),
+                nn.BatchNorm1d(args.MultiTask_FCHidden*2),
+                nn.LeakyReLU(0.2, inplace=True),
+                nn.Linear(args.MultiTask_FCHidden*2, args.MultiTask_FCHidden),
+                nn.BatchNorm1d(args.MultiTask_FCHidden),
+                nn.LeakyReLU(0.2, inplace=True),
+                nn.Linear(args.MultiTask_FCHidden, args.infoModel_outDim),
+            )
+            self.customForward = self.usingInfoForward
 
-        self.combineModel = nn.Sequential(
-            nn.Linear(args.textModel_outDim +
-                      args.infoModel_outDim, args.combine_dim),
-            nn.BatchNorm1d(args.combine_dim),
-            nn.LeakyReLU(0.2, inplace=True),
-            nn.Linear(args.combine_dim, 1)
-            # nn.Linear(args.textModel_outDim +
-            #           args.infoModel_outDim, 1),
-        )
+        if args.using_textModel and args.using_infoModel:
+            self.combineModel = nn.Sequential(
+                nn.Linear(args.textModel_outDim +
+                          args.infoModel_outDim, args.combine_dim),
+                nn.BatchNorm1d(args.combine_dim),
+                nn.LeakyReLU(0.2, inplace=True),
+                nn.Linear(args.combine_dim, 1)
+                # nn.Linear(args.textModel_outDim +
+                #           args.infoModel_outDim, 1),
+            )
+            self.customForward = self.usingBothForward
 
-    def forward(self, input, length):
+    def forward(self, input, length=None):
+
+        return self.customForward(input, length)
+
+    def usingTextForward(self, input, length):
 
         text_input, extra_info = input
 
         text_out = self.textModel(text_input, length)
 
-        # return text_out
+        return text_out
+
+    def usingInfoForward(self, input, length):
+
+        text_input, extra_info = input
+
+        extra_info_out = self.infoModel(extra_info)
+
+        return extra_info_out
+
+    def usingBothForward(self, input, length):
+
+        text_input, extra_info = input
+
+        text_out = self.textModel(text_input, length)
 
         extra_info_out = self.infoModel(extra_info)
 

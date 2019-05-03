@@ -4,11 +4,11 @@
 
 
 ## SSCL
-![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/SSCL_MultiTask.png.png?raw=true)
+![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/SSCL_MultiTask.png?raw=true)
 
 
 ## GatedCNN
 ![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/GatedCNN_MultiTask.png?raw=true)
 
-##
-![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/SelfAttn_MultiTask.png.png?raw=true)
+## SelfAttn
+![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/SelfAttn_MultiTask.png?raw=true)

@@ -12,3 +12,10 @@
 
 ## SelfAttn
 ![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/SelfAttn_MultiTask.png?raw=true)
+
+
+## Only textModel
+[[textModel]](https://github.com/ChihchengHsieh/IFN702SpamDetection)
+
+## only infoModel
+![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/OnlyInfoModel.png?raw=true)

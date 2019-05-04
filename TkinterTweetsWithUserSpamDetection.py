@@ -43,8 +43,7 @@ class args(object):
     dataset = "HSpam14"
     full_data = True
     usingWeightRandomSampling = True
-    # if we create the new vocab size, we have to do the new preprocess again
-    vocab_size = 30000
+    vocab_size = 30000  # if we create the new vocab size, we have to do the new preprocess again
     validation_portion = 0.05
     test_portion = 0.5
     random_seed = 64
@@ -55,8 +54,7 @@ class args(object):
 
     num_features = 16
 
-    pickle_name = "TweetsAndExtraInfoFullPickleData" + \
-        str(vocab_size) + "Vocab_Test" + str(test_portion) + ".txt"
+    pickle_name = "TweetsAndExtraInfoFullPickleData" + str(vocab_size) + "Vocab_Test" +str(test_portion)+ ".txt"
     pickle_name_beforeMapToIdx = "TweetsAndExtraInfoFullPickleData_df.txt"
 
     # Arch
@@ -65,22 +63,24 @@ class args(object):
     textModel_outDim = 16
     infoModel_outDim = 16
     combine_dim = 32
-
+    
     using_infoModel = True
     using_textModel = True
-
+    
+    
     assert (using_infoModel or using_textModel)
-
-    # One of them is false or both of them are false
-    if not (using_infoModel and using_textModel):
+    
+    
+    if not (using_infoModel and using_textModel): # One of them is false or both of them are false
         if (not using_infoModel) and (not using_textModel):
             raise ValueError('You must have to select infoModel or textModel')
         elif using_infoModel:
-            infoModel_outDim = 1  # can't be changed latter
+            infoModel_outDim = 1 # can't be changed latter 
         elif using_textModel:
-            textModel_outDim = 1  # can't be changed latter
-    else:
+            textModel_outDim = 1 # can't be changed latter
+    else: 
         print('Using Both Model')
+    
 
     # GatedCNN arch
 
@@ -221,6 +221,7 @@ setRadioButtons(modelSelected, "Model", models_list,
                 models_list, Take_ModelSelection, 0, 2)
 
 
+
 def setModelHyperPrams(window, text, x, y):
 
     l = tk.Label(window,
@@ -234,33 +235,33 @@ def setModelHyperPrams(window, text, x, y):
 
 
 def toggleCheckingCommand():
-
+    
     args.using_infoModel = using_infoModel.var.get()
     args.using_textModel = using_textModel.var.get()
-    print("State1: ", using_textModel.var.get())
-    print("State2: ", using_infoModel.var.get())
-
-    # One of them is false or both of them are false
-    if not (args.using_infoModel and args.using_textModel):
+    
+    if not (args.using_infoModel and args.using_textModel): # One of them is false or both of them are false
         if (not args.using_infoModel) and (not args.using_textModel):
-            resultTextbox.insert("end", ('Must Select at least one model\n'))
+            resultTextbox.insert("end",('Must Select at least one model\n'))
             window.update_idletasks()
         elif args.using_infoModel:
-            args.infoModel_outDim = 1  # can't be changed latter
-            infoModel_outDim.delete(0, tk.END)
+            args.infoModel_outDim = 1 # can't be changed latter 
+            infoModel_outDim.delete(0,tk.END)
             infoModel_outDim.insert("end", args.infoModel_outDim)
         elif using_textModel:
-            args.textModel_outDim = 1  # can't be changed latter
-            textModel_outDim.delete(0, tk.END)
+            args.textModel_outDim = 1 # can't be changed latter 
+            textModel_outDim.delete(0,tk.END)
             textModel_outDim.insert("end", args.textModel_outDim)
-    else:
+    else: 
         print('Using Both Model')
-
+    
+    
     if not(args.using_infoModel and args.using_textModel):
         infoModel_outDim.config(state='disabled')
         textModel_outDim.config(state='disabled')
         MultiTask_FCHidden.config(state='disabled')
         combine_dim.config(state='disabled')
+        if args.using_infoModel:
+            MultiTask_FCHidden.config(state='normal')
     else:
         infoModel_outDim.config(state='normal')
         textModel_outDim.config(state='normal')
@@ -270,11 +271,11 @@ def toggleCheckingCommand():
 
 def setCheckbox(window, text, x, y, command):
     var = tk.IntVar()
-    c = tk.Checkbutton(window, text=text, onvalue=1,
-                       offvalue=0, command=command, variable=var)
+    c = tk.Checkbutton(window, text= text, onvalue = 1, offvalue = 0, command = command, variable = var)
     c.grid(column=x, row=y)
     c.var = var
     return c
+
 
 
 x = 0
@@ -290,14 +291,12 @@ combine_dim_label, combine_dim = setModelHyperPrams(
     window, 'combine_dim', x, (y+4*2))
 
 
-using_textModel = setCheckbox(
-    window, 'using_textModel', x, 6, toggleCheckingCommand)
-using_infoModel = setCheckbox(
-    window, 'using_infoModel', x, 7, toggleCheckingCommand)
+using_textModel = setCheckbox(window, 'using_textModel', x, 6, toggleCheckingCommand)
+using_infoModel = setCheckbox(window, 'using_infoModel', x, 7, toggleCheckingCommand)
 
 if args.using_textModel:
     using_textModel.select()
-
+    
 if args.using_infoModel:
     using_infoModel.select()
 
@@ -562,6 +561,7 @@ infoModel_outDim.insert("end", args.infoModel_outDim)
 combine_dim.insert("end", args.combine_dim)
 
 
+
 def TakeNumOfParams():
 
     args.GatedCNN_embedingDim = int(GatedCNN_embedingDim.get())
@@ -602,8 +602,11 @@ def TakeNumOfParams():
     elif modelSelected.get() == 'SelfAttn':
         resultTextbox.insert("end", "Using SelfAttn\n")
         trainModel = SelfAttnModel
+    elif (args.using_infoModel and (not args.using_textModel)):
+        resultTextbox.insert("end", "Using infoModel Only\n")
+        trainModel = None
     else:
-        resultTextbox.insert("end", 'No Support For this Model\n')
+        resultTextbox.insert("end", 'No Support For this Model')
         raise ValueError
 
     window.update_idletasks()
@@ -735,6 +738,9 @@ def StartTraining():
     elif modelSelected.get() == 'SelfAttn':
         resultTextbox.insert("end", "Using SelfAttn\n")
         trainModel = SelfAttnModel
+    elif (args.using_infoModel and (not args.using_textModel)):
+        resultTextbox.insert("end", "Using infoModel Only\n")
+        trainModel = None
     else:
         resultTextbox.insert("end", 'No Support For this Model')
         raise ValueError
@@ -872,7 +878,7 @@ def StartTraining():
 
     test_loader = DataLoader(
         test_dataset, batch_size=args.batch_size, shuffle=False, drop_last=False)
-
+    
     print('Test_dataset size:', len(test_dataset))
     test_accs = []
     test_cms = []
@@ -880,8 +886,7 @@ def StartTraining():
     for i, (test_text, test_extra_info, test_length, test_label) in enumerate(test_loader):
         test_text, test_extra_info, test_length, test_label = test_text.to(
             device), test_extra_info.to(device), test_length.to(device), test_label.to(device)
-        test_loss, test_accuracy, test_cm = trainer.test_step(
-            ((test_text, test_extra_info), None), test_label)
+        test_loss, test_accuracy, test_cm = trainer.test_step(((test_text, test_extra_info), None), test_label)
 #         trainer.test_step(((test_text, test_extra_info), test_length), test_label)
         test_accs.append(test_accuracy)
         test_cms.append(test_cm)

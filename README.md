@@ -17,7 +17,9 @@ so the strcuture of this folder will become:
 
 4. The Tkinter Interface will pop out and you can train and test the models on it.
 
+# Model Structure
 
+![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/Instructions/NewSpamDetectionModel.png?raw=true)
 
 
 # Results

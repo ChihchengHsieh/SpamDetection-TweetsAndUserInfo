@@ -23,8 +23,6 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 
-%matplotlib inline
-
 '''
 2. Output .exe
 6. add Random Seed

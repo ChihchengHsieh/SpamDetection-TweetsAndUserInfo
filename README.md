@@ -22,6 +22,13 @@ so the strcuture of this folder will become:
 ![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/Instructions/NewSpamDetectionModel.png?raw=true)
 
 
+# Update for the small dataset running test:
+
+![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/TrainingResult/runningOnSamllDataset.png)
+
+As we see from the above image, a samll check button (runningOnSamllDataset) has been added above the result box. If this check button is ticked. The program will run on a small dataset to check if the preprocessing and environment is good to go. The samll dataset size is 22903 only. So it should be ab proper size for both cpu and gpu users. 
+
+
 # Results
 ## Using Both Models
 ### SSCL

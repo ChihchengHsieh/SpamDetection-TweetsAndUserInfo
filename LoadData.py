@@ -583,6 +583,13 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
 
         X_validation, X_test, Y_validation, Y_test = train_test_split(
             X_test, Y_test, test_size=args.test_portion, stratify=Y_test, random_state=args.random_seed)
+        
+        
+        resultTextbox.insert("end", ("Dataset Size: " + str(len(X_train) + len(X_validation) + len(X_test))  + "\n"))
+        resultTextbox.insert("end", ("TrainingSet Size: " + str(len(X_train)) + "\n"))
+        resultTextbox.insert("end", ("ValidationSet Size: " + str(len(X_validation)) + "\n"))
+        resultTextbox.insert("end", ("TestSet Size: " + str(len(X_test)) + "\n"))
+        window.update_idletasks()
 
         resultTextbox.insert("end", ('Creating Tweets_text...\n'))
         window.update_idletasks()

@@ -23,6 +23,7 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 
+
 '''
 2. Output .exe
 6. add Random Seed
@@ -45,7 +46,11 @@ class args(object):
     validation_portion = 0.05
     test_portion = 0.5
     random_seed = 64
+    
+    
+    ### If you want to run on the full dataset, change this to false
     runningOnSmallDataset = True
+    
 
     scheduler_step = 2000
     scheduler_gamma = 0.85
@@ -54,6 +59,7 @@ class args(object):
     num_features = 16
 
     pickle_name = "TweetsAndExtraInfoFullPickleData" + str(vocab_size) + "Vocab_Test" +str(test_portion)+ ".txt"
+    
     pickle_name_beforeMapToIdx = "TweetsAndExtraInfoFullPickleData_df.txt"
 
     # Arch
@@ -501,6 +507,10 @@ setBoolHyerParams(window, usingWeightRandomSampling,
                   "usingWeightRandomSampling", 0, (y+(18)))
 
 
+runningOnSmallDataset = tk.IntVar(value=args.runningOnSmallDataset)
+setBoolHyerParams(window, runningOnSmallDataset,
+                  "runningOnSmallDataset", 0, (y+(19)))
+
 resultTextbox = tk.Text(window, width=90)
 # resultTextbox.place(x=40, y=500, anchor='nw')
 
@@ -509,9 +519,9 @@ resultTextbox_scrollbar = tk.Scrollbar(
 
 resultTextbox.configure(yscrollcommand=resultTextbox_scrollbar.set)
 
-resultTextbox_scrollbar.grid(column=4, row=19, sticky=tk.W+tk.S+tk.N)
+resultTextbox_scrollbar.grid(column=4, row=20, sticky=tk.W+tk.S+tk.N)
 # resultTextbox.pack(side="right", fill="y")
-resultTextbox.grid(column=0, row=19, columnspan=4)
+resultTextbox.grid(column=0, row=20, columnspan=4)
 
 vocab_size.insert("end", args.vocab_size)
 validation_portion.insert("end", args.validation_portion)
@@ -662,6 +672,7 @@ def StartTraining():
     args.combine_dim = int(combine_dim.get())
 
     args.usingWeightRandomSampling = bool(usingWeightRandomSampling.get())
+    args.runningOnSmallDataset = bool(runningOnSmallDataset.get())
 
     args.GatedCNN_embedingDim = int(GatedCNN_embedingDim.get())
     args.GatedCNN_convDim = int(GatedCNN_convDim.get())
@@ -689,6 +700,10 @@ def StartTraining():
 
     args.model_path = './' + args.dataset + '_Log/' + args.model_name + '/Model/'
     args.log_path = './' + args.dataset + '_Log/' + args.model_name + '/Log/'
+    
+    ### When using the small dataset we change the name
+    if args.runningOnSmallDataset:
+        args.pickle_name = 'Small' + args.pickle_name
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -810,7 +825,7 @@ def StartTraining():
 
                 training_Canvas.image = TrainImg
 
-                training_Canvas.grid(column=5, row=0, rowspan=18)
+                training_Canvas.grid(column=5, row=0, rowspan=19)
 
                 window.update_idletasks()
 
@@ -861,7 +876,7 @@ def StartTraining():
 
                 trainingAndVal_Canvas.image = TrainAndValImg
 
-                trainingAndVal_Canvas.grid(column=5, row=19)
+                trainingAndVal_Canvas.grid(column=5, row=20)
 
                 window.update_idletasks()
 
@@ -909,7 +924,7 @@ ShowModel = tk.Button(window,
 ShowModel.grid(column=0, row=16, rowspan=1)
 
 StartButton = tk.Button(window,
-                        text='Strat Training',
+                        text='Start Training',
                         width=15, height=1,
                         command=StartTraining)
 StartButton.grid(column=0, row=17, rowspan=1)

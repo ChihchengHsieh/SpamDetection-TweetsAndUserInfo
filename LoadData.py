@@ -544,7 +544,7 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
             with open(os.path.join(args.dataset, args.pickle_name_beforeMapToIdx), "wb") as fp:  # Pickling
                 # pickle.dump([X_train, X_validation, X_test,
                 #              Y_train, Y_validation, Y_test,  tweets_text], fp)
-                pickle.dump(df,fp)
+                pickle.dump(df, fp)
                 resultTextbox.insert("end", ("The Pickle Data beforeMapToIdx Dumped to: " + str(os.path.join(
                     args.dataset, args.pickle_name_beforeMapToIdx)) + "\n"))
                 window.update_idletasks()
@@ -565,8 +565,22 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
 
         resultTextbox.insert("end", ('Spliting Datasets...\n'))
         window.update_idletasks()
-        X_train, X_test, Y_train, Y_test = train_test_split(df.drop(
-            'maliciousMark', axis=1), df['maliciousMark'], test_size=args.validation_portion, stratify=df['maliciousMark'],  random_state=args.random_seed)
+
+        #### A fake split for get the small size ###
+
+        # 0.02 dataset
+
+        if args.runningOnSmallDataset:
+            X_temp, X_train, Y_temp, Y_train = train_test_split(df.drop(
+                'maliciousMark', axis=1), df['maliciousMark'], test_size=0.02, stratify=df['maliciousMark'],  random_state=args.random_seed)
+            X_train, X_test, Y_train, Y_test = train_test_split(
+                X_train, Y_train, test_size=args.validation_portion, stratify=Y_train,  random_state=args.random_seed)
+            del X_temp
+            del Y_temp
+        else:
+            X_train, X_test, Y_train, Y_test = train_test_split(df.drop(
+                'maliciousMark', axis=1), df['maliciousMark'], test_size=args.validation_portion, stratify=df['maliciousMark'],  random_state=args.random_seed)
+
         X_validation, X_test, Y_validation, Y_test = train_test_split(
             X_test, Y_test, test_size=args.test_portion, stratify=Y_test, random_state=args.random_seed)
 
@@ -575,7 +589,6 @@ def TkloadingTweetsAndUserInfoData(args, resultTextbox, window):
         tweets_text = nltk.Text(list(itertools.chain(*X_train['text'])))
 
         ####################
-    
 
         args.vocab_size = args.vocab_size or len(tweets_text.tokens)
         if args.vocab_size:  # and this if expression

@@ -45,6 +45,7 @@ class args(object):
     validation_portion = 0.05
     test_portion = 0.5
     random_seed = 64
+    runningOnSmallDataset = True
 
     scheduler_step = 2000
     scheduler_gamma = 0.85

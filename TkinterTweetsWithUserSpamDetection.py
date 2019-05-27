@@ -23,7 +23,6 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 
-
 '''
 2. Output .exe
 6. add Random Seed
@@ -57,7 +56,7 @@ class args(object):
     scheduler_minLr = 0.00001
 
     num_features = 16
-
+    original_name = "TweetsAndExtraInfoFullPickleData" + str(vocab_size) + "Vocab_Test"+str(test_portion)+ ".txt" 
     pickle_name = "TweetsAndExtraInfoFullPickleData" + str(vocab_size) + "Vocab_Test" +str(test_portion)+ ".txt"
     
     pickle_name_beforeMapToIdx = "TweetsAndExtraInfoFullPickleData_df.txt"
@@ -702,8 +701,12 @@ def StartTraining():
     args.log_path = './' + args.dataset + '_Log/' + args.model_name + '/Log/'
     
     ### When using the small dataset we change the name
+    
     if args.runningOnSmallDataset:
-        args.pickle_name = 'Small' + args.pickle_name
+        args.pickle_name = 'Small' + args.original_name
+    else:
+        args.pickle_name = args.original_name
+    
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

@@ -23,17 +23,6 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 
-'''
-2. Output .exe
-6. add Random Seed
-7. Add test program
-8. test the loading dataset
-9. the Honeypot dataset == HSpam14
-10. add scheduler
-
-'''
-
-
 class args(object):
 
     # Data

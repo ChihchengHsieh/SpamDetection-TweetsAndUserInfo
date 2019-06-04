@@ -168,13 +168,20 @@ class Encoder(nn.Module):
     def forward(self, src_seq,  return_attns=False):
 
         '''
-        src_pos -> for positional embedding
+        src_seq?
+        src_pos? -> for positional embedding
         '''
         enc_slf_attn_list = []
         src_pos = self.get_positional_input(src_seq).to(src_seq.device)
         # -- Prepare masks
-        slf_attn_mask = get_attn_key_pad_mask(seq_k=src_seq, seq_q=src_seq) 
+        slf_attn_mask = get_attn_key_pad_mask(seq_k=src_seq, seq_q=src_seq) # seq_k = seq_q ? 
+        non_pad_mask = get_non_pad_mask(src_seq) 
 
+        # -- Forward # use two embedding layer for transform the input?
+        
+#         print('Source:' ,src_seq.shape)
+#         print('Word:', self.src_word_emb(src_seq).shape)
+#         print('Position: ',self.position_enc(src_pos).shape)
         enc_output = self.src_word_emb(src_seq) + self.position_enc(src_pos)
 
         for enc_layer in self.layer_stack:
@@ -186,7 +193,7 @@ class Encoder(nn.Module):
                 enc_slf_attn_list += [enc_slf_attn]
 
         if return_attns:
-            return enc_output, enc_slf_attn_list 
+            return enc_output, enc_slf_attn_list  # what's the usage of the attention map?
         return enc_output,
     
     def get_positional_input(self, input_seq):

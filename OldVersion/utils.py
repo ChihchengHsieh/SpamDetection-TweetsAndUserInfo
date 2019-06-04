@@ -6,30 +6,30 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 import torch.utils.data as Data
 import numpy as np
-from Datasets import TweetsWithUserInfoDataset
+from Datasets import HSapm14Dataset, TweetsWithUserInfoDataset
 from torch.utils.data import WeightedRandomSampler
 from Constants import Constants
 
 
 def mapIndexToWord(input, text):
-    '''
-    Map index to the word
-    '''
     return [text.tokens[i] for i in input]
 
     
-def CreateTweetsWithUserInfoDataset(X, y):
+def CreateTweetsWithUserInfoDatatset(X, y):
     '''
-    Create Pytorch dataset for tweets text and other information
+    At these step two kind of the sequential data has to be coped with, twitter text and 
     '''
     text_len = torch.tensor(list(map(len, X['text'])))
     text_len, text_len_idx = text_len.sort(0, descending=True)
 
     temp_text = list(X['text'])
-
+    # The efficiency here need to be improved
     text_ordered = [torch.LongTensor(temp_text[i]) for i in text_len_idx]
+    # X_ordered = torch.FloatTensor([list(map(float, list(
+    #     X.drop(['text'], axis=1).iloc[i.item(), :]))) for i in text_len_idx])
     X_ordered = torch.FloatTensor(np.array(X.drop(['text'], axis = 1))).index_select(0, text_len_idx)
     y_ordered = torch.FloatTensor(np.array(y)).index_select(0, text_len_idx)
+    # y_ordered = torch.FloatTensor(np.array([y[i] for i in text_len_idx]))
     text_p = pad_sequence(text_ordered, batch_first=True)
     print('Dataset Construction')
     dataset = TweetsWithUserInfoDataset(text_p, X_ordered, text_len, y_ordered)
@@ -37,11 +37,6 @@ def CreateTweetsWithUserInfoDataset(X, y):
 
 
 def getSampler(dataset):
-    '''
-    According to the label portion in the dataset, generate the WeightedRandomSampler.
-
-    WeightedRandomSampler: https://pytorch.org/docs/stable/data.html#torch.utils.data.WeightedRandomSampler
-    '''
 
     target = torch.tensor([label for _, _, _, label in dataset])
     class_sample_count = torch.tensor(
@@ -56,19 +51,24 @@ def getSampler(dataset):
 
 
 def matchingURL(match):
-    '''
-    Return the domain name of the url
-    '''
     try:
         return urlparse(match.group()).netloc or match.group().split("/")[0]
     except:
         return match.group().split("/")[0]
 
 
+def preprocessingInputData(input):
+    tknzr = TweetTokenizer()
+    ps = nltk.stem.PorterStemmer()
+    allText = [i for i in input]
+    preprocessedText = [[ps.stem(word) for word in tknzr.tokenize(re.sub(r'\d+', '', re.sub(r"http\S+|www.\S+", matchingURL,
+                                                                                            sentence)).lower()) if word not in nltk.corpus.stopwords.words('english') and len(word) >= 3] for sentence in allText]
+    return preprocessedText
+
 
 def mapFromWordToIdx(input, text):
     '''
-    Map the word to index, so it can be fed into the embedding layer.
+    Using text, so it will be changed once we update the text
     '''
     wholeText = []
 
@@ -85,10 +85,27 @@ def mapFromWordToIdx(input, text):
     return wholeText
 
 
+def CreateDatatset(text, X, y):
+    '''
+    The input X is the idx so we can't get the original one from here?
+    '''
+
+    X_len = torch.tensor(list(map(len, X)))
+    X_len, X_len_idx = X_len.sort(0, descending=True)
+
+    text_ordered = [text[i] for i in X_len_idx]
+    X_ordered = [torch.LongTensor(X[i]) for i in X_len_idx]
+    y_ordered = [y[i] for i in X_len_idx]
+    y_ordered = torch.FloatTensor(np.array(y_ordered))
+
+    X_p = pad_sequence(X_ordered, batch_first=True)
+
+    dataset = HSapm14Dataset(text_ordered, X_p, X_len, y_ordered)
+
+    return dataset
 
 
-####################### FOR TRANSFORMER MASKING #######################
-### Transformer Paper: https://arxiv.org/pdf/1706.03762.pdf
+####################### FOR MASKING #######################
 
 def get_non_pad_mask(seq):
     assert seq.dim() == 2

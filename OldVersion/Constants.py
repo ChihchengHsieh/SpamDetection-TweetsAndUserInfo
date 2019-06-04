@@ -1,5 +1,5 @@
 class Constants():
-    ''' The Constants for the mapping terms to index '''
+    ''' The Constants for the text '''
     PAD = 0
     UNK = 1
     SOS = 2

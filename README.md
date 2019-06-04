@@ -17,6 +17,30 @@ so the strcuture of this folder will become:
 
 4. The Tkinter Interface will pop out and you can train and test the models on it.
 
+# Features in the dataset:
+
+
+
+### Tweets
+	text
+	numberOfHashtags_c
+	favorite_count
+	retweet_count
+	possibly_sensitive
+
+### User:
+	followers_count 
+	friends_count
+	default_profile 
+	default_profile_image
+	favourites_count
+	listed_count
+	statuses_count
+	verified
+
+
+
+
 # Model Structure
 
 ![](https://github.com/ChihchengHsieh/SpamDetection-TweetsAndUserInfo/blob/master/Instructions/NewSpamDetectionModel.png?raw=true)
